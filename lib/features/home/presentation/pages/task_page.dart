@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../auth/presentaion/controllers/login_controller.dart';
 import '../../data/model/task_model.dart';
 import '../controll/task_controller.dart';
 
@@ -15,10 +16,36 @@ class TaskPage extends GetView<TaskController> {
     return Scaffold(
       backgroundColor: Colors.grey.shade300,
       appBar: AppBar(
-        title: const Text("📝 Task Manager",style: TextStyle(color: Colors.white),),
-        centerTitle: true,
+        title: const Text(
+          "📝 Task Manager",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.deepPurple,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: IconButton(
+              icon: const Icon(Icons.logout, color: Colors.white),
+              onPressed: () {
+                Get.defaultDialog(
+                  title: "Confirm Logout",
+                  middleText: "Are you sure you want to logout?",
+                  textConfirm: "Yes",
+                  textCancel: "No",
+                  confirmTextColor: Colors.white,
+                  onConfirm: () {
+                    Get.find<LoginController>().logout();
+                    Get.back();
+                  },
+                );
+              },
+
+              tooltip: 'Logout',
+            ),
+          ),
+        ],
       ),
+
       body: Obx(() {
         if (controller.tasks.isEmpty) {
           return const Center(
@@ -93,15 +120,26 @@ class TaskPage extends GetView<TaskController> {
                           textCancel: 'Cancel',
                           confirmTextColor: Colors.white,
                           onConfirm: () {
-                            controller.updateTask(
-                              Task(
-                                id: task.id,
-                                title: titleController.text,
-                                description: descController.text,
-                              ),
-                            );
-                            Get.back();
+                            if (titleController.text.trim().isEmpty || descController.text.trim().isEmpty) {
+                              Get.snackbar(
+                                "Error",
+                                "Both Title and Description are required!",
+                                backgroundColor: Colors.orangeAccent,
+                                colorText: Colors.white,
+                                snackPosition: SnackPosition.BOTTOM,
+                              );
+                            } else {
+                              controller.updateTask(
+                                Task(
+                                  id: task.id,
+                                  title: titleController.text.trim(),
+                                  description: descController.text.trim(), userId: task.userId,
+                                ),
+                              );
+                              Get.back();
+                            }
                           },
+
                         );
                       },
                     ),
@@ -148,9 +186,20 @@ class TaskPage extends GetView<TaskController> {
             textCancel: 'Cancel',
             confirmTextColor: Colors.white,
             onConfirm: () {
-              controller.addTask();
-              Get.back();
+              if (controller.title.value.trim().isEmpty || controller.description.value.trim().isEmpty) {
+                Get.snackbar(
+                  "Error",
+                  "Both Title and Description are required!",
+                  backgroundColor: Colors.redAccent,
+                  colorText: Colors.white,
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              } else {
+                controller.addTask();
+                Get.back();
+              }
             },
+
           );
         },
         backgroundColor: Colors.deepPurple,

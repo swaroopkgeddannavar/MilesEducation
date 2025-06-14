@@ -1,33 +1,48 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import '../../features/home/data/model/task_model.dart';
 
-
 class TaskService {
-  final CollectionReference taskCollection =
-  FirebaseFirestore.instance.collection('tasks');
+  final FirebaseFirestore firestore;
+  final FirebaseAuth auth;
 
-  // Create
-  Future<void> addTask(Task task) async {
-    await taskCollection.add(task.toMap());
-  }
+  TaskService({required this.firestore, required this.auth});
 
-  // Read
+  CollectionReference get _taskCollection => firestore.collection('tasks');
+
   Stream<List<Task>> getTasks() {
-    return taskCollection.snapshots().map((snapshot) {
-      return snapshot.docs
-          .map((doc) => Task.fromMap(doc.data() as Map<String, dynamic>, doc.id))
-          .toList();
+    final userId = auth.currentUser?.uid;
+    if (userId == null) {
+      return Stream.value([]);
+    }
+
+    return _taskCollection
+        .where('userId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      return snapshot.docs.map((doc) {
+        final data = doc.data() as Map<String, dynamic>;
+        return Task.fromJson({
+          ...data,
+          'id': doc.id,
+        });
+      }).toList();
     });
   }
 
-  // Update
-  Future<void> updateTask(Task task) async {
-    await taskCollection.doc(task.id).update(task.toMap());
+  Future<void> addTask(Task task) async {
+    final docRef = _taskCollection.doc();
+    final taskWithId = task.copyWith(id: docRef.id);
+    await docRef.set(taskWithId.toJson());
   }
 
-  // Delete
-  Future<void> deleteTask(String taskId) async {
-    await taskCollection.doc(taskId).delete();
+  Future<void> updateTask(Task task) async {
+    if (task.id.isEmpty) throw ArgumentError("Task ID cannot be empty");
+    await _taskCollection.doc(task.id).update(task.toJson());
+  }
+
+  Future<void> deleteTask(String id) async {
+    if (id.isEmpty) throw ArgumentError("Document ID is required for deletion");
+    await _taskCollection.doc(id).delete();
   }
 }

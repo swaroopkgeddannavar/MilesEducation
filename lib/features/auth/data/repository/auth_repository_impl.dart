@@ -29,12 +29,11 @@ class AuthRepositoryImpl implements AuthRepository {
         case 'wrong-password':
           return Left(UnknownFailure(message: 'Wrong password provided.'));
         default:
-          return Left(UnknownFailure(message: e.message ?? 'Authentication failed.'));
+          return Left(
+            UnknownFailure(message: e.message ?? 'Authentication failed.'),
+          );
       }
-    } catch (e, stackTrace) {
-      // Optional: print to debug logs
-      print('🔥 Login error: $e');
-      print('📍 Stack trace: $stackTrace');
+    } catch (e) {
       return Left(UnknownFailure(message: 'Unexpected error: ${e.toString()}'));
     }
   }
@@ -59,6 +58,16 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(UnknownFailure(message: "${e.message}"));
     } catch (e) {
       return left(UnknownFailure(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> logout() async {
+    try {
+      await _firebaseAuth.signOut();
+      return const Right(null);
+    } on FirebaseAuthException catch (e) {
+      return Left(UnknownFailure(message: e.message ?? "Logout failed"));
     }
   }
 }
