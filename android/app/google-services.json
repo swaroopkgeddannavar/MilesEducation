@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "534551208883",
+    "project_id": "mileseducation-e4b1c",
+    "storage_bucket": "mileseducation-e4b1c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:534551208883:android:40bad6f70464cff198e1c6",
+        "android_client_info": {
+          "package_name": "com.example.miles_educations"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCK0XtObEifP_GrIeZ2IbaGUQ3AnJWsYZA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
