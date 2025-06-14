@@ -121,6 +121,7 @@ class TaskPage extends GetView<TaskController> {
                           confirmTextColor: Colors.white,
                           onConfirm: () {
                             if (titleController.text.trim().isEmpty || descController.text.trim().isEmpty) {
+                              Get.closeCurrentSnackbar();
                               Get.snackbar(
                                 "Error",
                                 "Both Title and Description are required!",
@@ -187,6 +188,7 @@ class TaskPage extends GetView<TaskController> {
             confirmTextColor: Colors.white,
             onConfirm: () {
               if (controller.title.value.trim().isEmpty || controller.description.value.trim().isEmpty) {
+                Get.closeCurrentSnackbar();
                 Get.snackbar(
                   "Error",
                   "Both Title and Description are required!",

@@ -28,24 +28,33 @@ class LoginController extends GetxController {
       LoginParams(email.value.trim(), password.value.trim()),
     );
 
-    result.fold((failure) => errorMessage.value = failure.message, (
-      userData,
-    ) async {
-      final token = await userData.getIdToken();
-      if (token != null) {
-        hiveStorage.saveAuthToken(token);
-        print("token: $token");
-      }
-      print("User logged in: $userData");
-      Get.offAllNamed('/tasks');
-      Get.snackbar(
-        'Success',
-        "Login Successful",
-        backgroundColor: Colors.white,
-        colorText: Colors.blue,
-        snackPosition: SnackPosition.BOTTOM,
-      );
-    });
+    result.fold(
+      (failure) {
+        if (failure.message.contains('auth credential is incorrect') ||
+            failure.message.contains('malformed') ||
+            failure.message.contains('expired')) {
+          errorMessage.value = "Invalid credential or account does not exist. Please try signing in again.";
+        } else {
+          errorMessage.value = failure.message;
+        }
+      },
+      (userData) async {
+        final token = await userData.getIdToken();
+        if (token != null) {
+          hiveStorage.saveAuthToken(token);
+          print("token: $token");
+        }
+        print("User logged in: $userData");
+        Get.offAllNamed('/tasks');
+        Get.snackbar(
+          'Success',
+          "Login Successful",
+          backgroundColor: Colors.white,
+          colorText: Colors.blue,
+          snackPosition: SnackPosition.BOTTOM,
+        );
+      },
+    );
 
     isLoading.value = false;
   }
